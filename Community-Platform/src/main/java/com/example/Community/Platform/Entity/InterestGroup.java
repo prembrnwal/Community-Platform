@@ -26,5 +26,5 @@ public class InterestGroup {
 
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
- +
+
 }
