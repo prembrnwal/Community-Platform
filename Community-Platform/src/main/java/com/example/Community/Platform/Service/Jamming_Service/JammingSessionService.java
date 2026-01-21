@@ -1,0 +1,105 @@
+package com.example.Community.Platform.Service.Jamming_Service;
+
+import com.example.Community.Platform.DTO.Jamming_Dto.CreateJammingSessionRequest;
+import com.example.Community.Platform.Entity.InterestGroup;
+import com.example.Community.Platform.Entity.Jamming_Entity.JammingParticipant;
+import com.example.Community.Platform.Entity.Jamming_Entity.JammingSession;
+import com.example.Community.Platform.Entity.Login_User;
+import com.example.Community.Platform.Enum.SessionStatus;
+import com.example.Community.Platform.Repository.InterestGroupRepository;
+import com.example.Community.Platform.Repository.Jamming_Repo.JammingParticipantRepository;
+import com.example.Community.Platform.Repository.Jamming_Repo.JammingSessionRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Service
+public class JammingSessionService {
+
+    @Autowired
+    private JammingSessionRepository sessionRepo;
+
+    @Autowired
+    private JammingParticipantRepository participantRepo;
+
+    @Autowired
+    private InterestGroupRepository groupRepo;
+
+    @Autowired
+    private GroupMemberRepository groupMemberRepo;
+
+    /* CREATE SESSION */
+    public JammingSession createSession(
+            Long groupId,
+            CreateJammingSessionRequest request,
+            Login_User currentUser) {
+
+        InterestGroup group = groupRepo.findById(groupId)
+                .orElseThrow(() -> new RuntimeException("Group not found"));
+
+        if (!groupMemberRepo.existsByUserAndGroup(currentUser, group)) {
+            throw new RuntimeException("User is not group member");
+        }
+
+        if (request.getStartTime().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("Start time must be in future");
+        }
+
+        JammingSession session = new JammingSession();
+        session.setGroup(group);
+        session.setTitle(request.getTitle());
+        session.setDescription(request.getDescription());
+        session.setStartTime(request.getStartTime());
+        session.setDurationMinutes(request.getDurationMinutes());
+        session.setCreatedBy(currentUser);
+        session.setStatus(SessionStatus.UPCOMING);
+
+        return sessionRepo.save(session);
+    }
+
+    /* JOIN SESSION */
+    public void joinSession(Long sessionId, Login_User user) {
+
+        JammingSession session = sessionRepo.findById(sessionId)
+                .orElseThrow(() -> new RuntimeException("Session not found"));
+
+        if (session.getStatus() == SessionStatus.ENDED) {
+            throw new RuntimeException("Session ended");
+        }
+
+        if (participantRepo.existsBySessionAndUser(session, user)) {
+            throw new RuntimeException("Already joined");
+        }
+
+        JammingParticipant participant = new JammingParticipant();
+        participant.setSession(session);
+        participant.setUser(user);
+
+        participantRepo.save(participant);
+    }
+
+    /* LEAVE SESSION */
+    public void leaveSession(Long sessionId, Login_User user) {
+
+        JammingSession session = sessionRepo.findById(sessionId)
+                .orElseThrow(() -> new RuntimeException("Session not found"));
+
+        JammingParticipant participant = participantRepo
+                .findBySessionAndUserAndLeftAtIsNull(session, user)
+                .orElseThrow(() -> new RuntimeException("Not joined"));
+
+        participant.setLeftAt(LocalDateTime.now());
+        participantRepo.save(participant);
+    }
+
+    /* PARTICIPANTS LIST */
+    public List<JammingParticipant> getParticipants(Long sessionId) {
+
+        JammingSession session = sessionRepo.findById(sessionId)
+                .orElseThrow(() -> new RuntimeException("Session not found"));
+
+        return participantRepo.findBySessionAndLeftAtIsNull(session);
+    }
+}
