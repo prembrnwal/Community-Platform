@@ -9,6 +9,7 @@ import com.example.Community.Platform.Enum.SessionStatus;
 import com.example.Community.Platform.Repository.InterestGroupRepository;
 import com.example.Community.Platform.Repository.Jamming_Repo.JammingParticipantRepository;
 import com.example.Community.Platform.Repository.Jamming_Repo.JammingSessionRepository;
+import com.example.Community.Platform.Repository.MembershipRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +29,7 @@ public class JammingSessionService {
     private InterestGroupRepository groupRepo;
 
     @Autowired
-    private GroupMemberRepository groupMemberRepo;
+    private MembershipRepository membershipRepo;
 
     /* CREATE SESSION */
     public JammingSession createSession(
@@ -39,7 +40,7 @@ public class JammingSessionService {
         InterestGroup group = groupRepo.findById(groupId)
                 .orElseThrow(() -> new RuntimeException("Group not found"));
 
-        if (!groupMemberRepo.existsByUserAndGroup(currentUser, group)) {
+        if (!membershipRepo.existsByUserAndGroup(currentUser, group)) {
             throw new RuntimeException("User is not group member");
         }
 
