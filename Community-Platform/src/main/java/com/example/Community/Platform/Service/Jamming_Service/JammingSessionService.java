@@ -1,6 +1,7 @@
 package com.example.Community.Platform.Service.Jamming_Service;
 
 import com.example.Community.Platform.DTO.Jamming_Dto.CreateJammingSessionRequest;
+import com.example.Community.Platform.DTO.Jamming_Dto.JammingSessionResponse;
 import com.example.Community.Platform.Entity.InterestGroup;
 import com.example.Community.Platform.Entity.Jamming_Entity.JammingParticipant;
 import com.example.Community.Platform.Entity.Jamming_Entity.JammingSession;
@@ -102,5 +103,17 @@ public class JammingSessionService {
                 .orElseThrow(() -> new RuntimeException("Session not found"));
 
         return participantRepo.findBySessionAndLeftAtIsNull(session);
+    }
+    private JammingSessionResponse mapToResponse(JammingSession session) {
+        JammingSessionResponse dto = new JammingSessionResponse();
+        dto.setId(session.getId());
+        dto.setTitle(session.getTitle());
+        dto.setDescription(session.getDescription());
+        dto.setStartTime(session.getStartTime());
+        dto.setDurationMinutes(session.getDurationMinutes());
+        dto.setStatus(session.getStatus());
+        dto.setGroupId(session.getGroup().getId());
+        dto.setCreatedBy(session.getCreatedBy().getEmail());
+        return dto;
     }
 }
