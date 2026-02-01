@@ -47,6 +47,9 @@ public class Login_User {
         @Column(name = "interests")
         private String interests;
 
+        @Column(name = "profile_picture")
+        private String profilePicture;
+
         public Login_User(String email, String name, String password) {
                 this.email = email;
                 this.name = name;

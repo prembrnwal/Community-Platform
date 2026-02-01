@@ -100,4 +100,5 @@ public class ChatService {
         dto.setTimestamp(message.getTimestamp());
         return dto;
     }
+
 }

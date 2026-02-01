@@ -9,10 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserInfo {
-    private String email;
-    private String name;
-    private String bio;
-    private String interests;
-    private String profilePicture;
+public class ChangePasswordRequest {
+    private String currentPassword;
+    private String newPassword;
 }

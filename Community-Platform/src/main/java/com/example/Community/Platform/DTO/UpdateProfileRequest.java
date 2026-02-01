@@ -9,10 +9,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserInfo {
-    private String email;
+public class UpdateProfileRequest {
     private String name;
     private String bio;
     private String interests;
-    private String profilePicture;
 }
